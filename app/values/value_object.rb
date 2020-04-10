@@ -4,24 +4,17 @@ class ValueObject
 
   # if string, array or hash -- should be .frozen
   def initialize(attribs)
-    @value = case attribs
-            when Hash
-              attribute = attribs.with_indifferent_access
-              attribute[:value]
-            else
-              attribs
-            end
-    @unit = case attribs
-            when Hash
-              attribute = attribs.with_indifferent_access
-              attribute[:unit]
-            else
-              nil
-            end
+    @value, @unit = case attribs
+                    when Hash
+                      attribute = attribs.with_indifferent_access
+                      [attribute[:value], attribute[:unit]]
+                    else
+                      [attribs, nil]
+                    end
   end
 
   def attributes
-    {"value" => value, "unit" => unit}
+    {value: value, unit: unit}
   end
 
   # override as needed

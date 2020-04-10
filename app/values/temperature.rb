@@ -6,34 +6,35 @@ class Temperature < ValueObject
 
 
   def initialize(attribs={})
-    value = case attribs
-            when Hash
-              attribute = attribs.with_indifferent_access
-              attribute[:degrees] || attribute[:value]
-            when String
-              attribs.to_s.blank? ? nil : Float(attribs.to_s)
-            when Integer
-              Float(attribs)
-            when Float
-              attribs
-            when NilClass
-              nil
-            else
-              raise ArgumentError
-            end
-    unit = case attribs
-            when Hash
-              attribute = attribs.with_indifferent_access
-              attribute[:unit] || attribute[:units] || "*C"
-            else
-              "*C"
-            end
-    super({value: value, unit: unit})
+    value, unit = case attribs
+                  when Hash
+                    attribute = attribs.with_indifferent_access
+                    value = attribute[:degrees] || attribute[:value]
+                    unit  = attribute[:units]   || attribute[:unit]  || "*C"
+                    [value, unit]
+                  when Array
+                    raise ArgumentError, "argument must be a number or a hash {degree: , unit:}"
+                  else
+                    [attribs, "*C"]
+                  end
+    cast_value = case value
+                  when String
+                    value.to_s.blank? ? nil : Float(value.to_f)
+                  when Integer
+                    Float(value)
+                  when BigDecimal
+                    Float(value)
+                  when Float, NilClass
+                    value
+                  else
+                    raise ArgumentError, "Degrees must be a numeric type"
+                  end
+    super({value: cast_value, unit: unit})
   end
 
   # define the unit
   def attributes
-    super.attributes.merge({degrees: degrees})
+    ({degrees: degrees}).merge(super).except(:value)
   end
 
   # value object logic
