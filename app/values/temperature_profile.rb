@@ -1,0 +1,3 @@
+class TemperatureProfile
+
+end
